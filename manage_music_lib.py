@@ -173,14 +173,48 @@ class MusicManager:
         # Select only the relevant columns after sorting
         return sorted_album_data[['Album Title', 'Artist', 'Release Year']].reset_index(drop=True)
 
+    # def formatted_missing_seated_artists(self):
+    #     """Return a DataFrame of artists missing from the seated list and not in the exclude list."""
+    #     all_artists_df = self.get_all_artists()
+    #     if all_artists_df.empty:
+    #         print("No artist data available for comparison.")
+    #         return pd.DataFrame(columns=['Missing Artist'])
+    #     missing_artists = set(all_artists_df['Artist']) - set(self.seated_artist_data) - self.exclude_artists
+    #     return pd.DataFrame(sorted(missing_artists), columns=['Missing Artist']).reset_index(drop=True)
+    
     def formatted_missing_seated_artists(self):
         """Return a DataFrame of artists missing from the seated list and not in the exclude list."""
         all_artists_df = self.get_all_artists()
         if all_artists_df.empty:
             print("No artist data available for comparison.")
             return pd.DataFrame(columns=['Missing Artist'])
-        missing_artists = set(all_artists_df['Artist']) - set(self.seated_artist_data) - self.exclude_artists
+        
+        # Ensure all components are sets
+        missing_artists = set(all_artists_df['Artist']) - set(self.seated_artist_data) - set(self.exclude_artists)
+        
         return pd.DataFrame(sorted(missing_artists), columns=['Missing Artist']).reset_index(drop=True)
+
+    
+    def formatted_missing_library_artists(self):
+        """
+        Return a DataFrame of artists that are in the seated data but not in the library.
+        """
+        # Ensure both seated artist data and library artist data are loaded
+        all_artists_df = self.get_all_artists()
+        if all_artists_df.empty:
+            print("No artist data available in the library for comparison.")
+            return pd.DataFrame(columns=['Missing Library Artist'])
+
+        # Convert the seated artists and library artists to sets for easy comparison
+        seated_artist_set = set(self.seated_artist_data)
+        library_artist_set = set(all_artists_df['Artist'])
+        
+        # Find artists in seated but not in the library
+        missing_library_artists = seated_artist_set - library_artist_set
+
+        # Convert the result to a sorted DataFrame
+        return pd.DataFrame(sorted(missing_library_artists), columns=['Missing Library Artist']).reset_index(drop=True)
+
     
     def formatted_cleanup_review(self):
         """Return a DataFrame showing the original and cleaned album names for review."""
