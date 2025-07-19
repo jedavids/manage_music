@@ -4,6 +4,8 @@ import re
 import numpy as np
 from selenium import webdriver
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 import time
 from IPython.display import display
 
@@ -97,9 +99,30 @@ class MusicManager:
             try:
                 driver = webdriver.Chrome()
                 driver.get('https://go.seated.com/notifications/login')
-                phone_number_input = driver.find_element(By.CSS_SELECTOR, 'input[placeholder="Phone Number"]')
+
+                # Wait for the phone number field to be interactable
+                phone_number_input = WebDriverWait(driver, 10).until(
+                    EC.element_to_be_clickable((By.CSS_SELECTOR, 'input[placeholder="Phone Number"]'))
+                )
                 phone_number_input.send_keys(login_id)
-                verify_button = driver.find_element(By.XPATH, '//button[text()="Verify"]')
+
+                # Tick the 'Verify you are human' checkbox if present
+                try:
+                    human_checkbox = WebDriverWait(driver, 10).until(
+                        EC.element_to_be_clickable(
+                            (
+                                By.XPATH,
+                                '//span[contains(text(), "Verify you are human")]/preceding::input[@type="checkbox"][1]',
+                            )
+                        )
+                    )
+                    human_checkbox.click()
+                except Exception:
+                    pass
+
+                verify_button = WebDriverWait(driver, 10).until(
+                    EC.element_to_be_clickable((By.XPATH, '//button[text()="Verify"]'))
+                )
                 verify_button.click()
                 input("Press Enter to continue...")
 
